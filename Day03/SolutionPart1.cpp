@@ -36,8 +36,9 @@ std::vector<Line>		parse(std::string str)
 	int					pos;
 
 	delimiter = ",";
-	while ((pos = str.find(delimiter)) != std::string::npos)
+	do
 	{
+		pos = str.find(delimiter);
 		token = str.substr(0, pos);
 		if (str[0] == 'U')
 		{
@@ -58,7 +59,7 @@ std::vector<Line>		parse(std::string str)
 		str.erase(0, pos + delimiter.length());
 		tokens.push_back(line);
 		line.p1 = line.p2;
-	}
+	} while (pos != std::string::npos);
 	return (tokens);
 }
 
@@ -99,6 +100,11 @@ Point					findIntersection(Line l1, Line l2)
 	}
 }
 
+int						stepsFromPointAToPointB(Point a, Point b)
+{
+	return (abs(a.x - b.x) + abs(a.y - b.y));
+}
+
 int						main(void)
 {
 	std::fstream		infile("InputPart1.txt");
@@ -108,8 +114,14 @@ int						main(void)
 	std::vector<Line>	wire2;
 	Point				intersection;
 	Point				closest;
+	Point				lowestSteps;
+	int					wire1Steps;
+	int					wire2Steps;
+	int					smallestSteps;
 	bool				first;
 
+	wire1Steps = 0;
+	wire2Steps = 0;
 	first = true;
 	getline(infile, lineFromFile1);
 	getline(infile, lineFromFile2);
@@ -117,19 +129,28 @@ int						main(void)
 	wire2 = parse(lineFromFile2);
 	for (std::vector<Line>::iterator it1 = wire1.begin(); it1 != wire1.end(); it1++)
 	{
+		wire2Steps = 0;
 		for (std::vector<Line>::iterator it2 = wire2.begin(); it2 != wire2.end(); it2++)
 		{
+			// std::cout << "Wire 1 steps: " << wire1Steps << ", wire 2 steps: " << wire2Steps << std::endl;
 			if (linesIntersect(*it1, *it2))
 			{
 				intersection = findIntersection(*it1, *it2);
 				if (first == true || distanceFromOrigin(intersection) < distanceFromOrigin(closest))
 				{
 					closest = intersection;
-					first = false;
 				}
+				if (first == true || wire2Steps + stepsFromPointAToPointB(it2->p1, intersection) + wire1Steps + stepsFromPointAToPointB(it1->p1, intersection) < smallestSteps)
+				{
+					smallestSteps = wire2Steps + stepsFromPointAToPointB(it2->p1, intersection) + wire1Steps + stepsFromPointAToPointB(it1->p1, intersection);
+				}
+				first = false;
 			}
+			wire2Steps += stepsFromPointAToPointB(it2->p1, it2->p2);
 		}
+		wire1Steps += stepsFromPointAToPointB(it1->p1, it1->p2);
 	}
 	std::cout << "Closest: (" << closest.x << ", " << closest.y << "), distance: " << distanceFromOrigin(closest) << std::endl;
+	std::cout << "Smalles steps: " << smallestSteps << std::endl;
 	return (0);
 }
