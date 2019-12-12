@@ -33,15 +33,56 @@ orbitalMap				plotOrbits(char *fileName)
 	return (orbits);
 }
 
-int						printOrbits(orbitalMap & orbits, std::string key, int depth)
+int						countOrbits(orbitalMap & orbits, std::string key, int depth)
 {
 	int					temp = 0;
 
 	for (int i = 0; i < orbits[key].size(); i++)
 	{
-		temp += printOrbits(orbits, orbits[key].at(i), depth + 1);
+		temp += countOrbits(orbits, orbits[key].at(i), depth + 1);
 	}
 	return (depth + temp);
+}
+
+void					shortestDistanceHelper(orbitalMap & orbits, std::string key, std::map<std::string, int> & info, std::string d1, std::string d2)
+{
+	if (key == d1 || key == d2)
+	{
+		info["finished"] += 1;
+	}
+	if (info["finished"] == 1)
+	{
+		info["transfers"] += 1;
+		info[key] = 1;
+	}
+	for (int i = 0; i < orbits[key].size(); i++)
+	{
+		shortestDistanceHelper(orbits, orbits[key].at(i), info, d1, d2);
+	}
+	if (info["finished"] == 1)
+	{
+		if (info[key] == 1)
+		{
+			info["transfers"] -= 1;
+		}
+		else
+		{
+			info["transfers"] += 1;
+			info[key] = 1;
+		}
+	}
+	
+	
+}
+
+int						shortestDistance(orbitalMap & orbits, std::string start, std::string d1, std::string d2)
+{
+	std::map<std::string, int>	info;
+
+	info["finished"] = 0;
+	info["transfers"] = 0;
+	shortestDistanceHelper(orbits, start, info, d1, d2);
+	return (info["transfers"]);
 }
 
 int						main(int argc, char *argv[])
@@ -54,7 +95,8 @@ int						main(int argc, char *argv[])
 	if (argc == 2)
 	{
 		orbits = plotOrbits(argv[1]);
-		std::cout << "The number of direct and indirect orbits is: " << printOrbits(orbits, "COM", 0) << std::endl;;
+		std::cout << "Number of orbits: " << countOrbits(orbits, "COM", 0) << std::endl;
+		std::cout << "Number of transfers: " << shortestDistance(orbits, "COM", "YOU", "SAN") << std::endl;
 	}
 	else
 	{
