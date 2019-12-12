@@ -35,8 +35,9 @@ orbitalMap				plotOrbits(char *fileName)
 
 int						countOrbits(orbitalMap & orbits, std::string key, int depth)
 {
-	int					temp = 0;
+	int					temp;
 
+	temp = 0;
 	for (int i = 0; i < orbits[key].size(); i++)
 	{
 		temp += countOrbits(orbits, orbits[key].at(i), depth + 1);
@@ -70,18 +71,16 @@ void					shortestDistanceHelper(orbitalMap & orbits, std::string key, std::map<s
 			info["transfers"] += 1;
 			info[key] = 1;
 		}
-	}
-	
-	
+	}	
 }
 
-int						shortestDistance(orbitalMap & orbits, std::string start, std::string d1, std::string d2)
+int						shortestDistance(orbitalMap & orbits, std::string start, std::string destination1, std::string destination2)
 {
 	std::map<std::string, int>	info;
 
 	info["finished"] = 0;
 	info["transfers"] = 0;
-	shortestDistanceHelper(orbits, start, info, d1, d2);
+	shortestDistanceHelper(orbits, start, info, destination1, destination2);
 	return (info["transfers"]);
 }
 
@@ -89,9 +88,7 @@ int						main(int argc, char *argv[])
 {
 	orbitalMap			orbits;
 	std::string			key;
-	int					numberOfOrbits;
 
-	numberOfOrbits = 0;
 	if (argc == 2)
 	{
 		orbits = plotOrbits(argv[1]);
